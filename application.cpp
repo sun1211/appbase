@@ -99,9 +99,9 @@ void application::setup_signal_handling_on_ios(boost::asio::io_service& ios, boo
 #ifdef SIGPIPE
    ss->add(SIGPIPE);
 #endif
-#ifdef SIGHUP
+#ifdef SIGHUSR2
    if( startup ) {
-      ss->add(SIGHUP);
+      ss->add(SIGHUSR2);
    }
 #endif
    wait_for_signal(ss);
@@ -135,8 +135,8 @@ void application::startup() {
    clean_up_signal_thread();
    setup_signal_handling_on_ios(get_io_service(), false);
 
-#ifdef SIGHUP
-   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(get_io_service(), SIGHUP));
+#ifdef SIGHUSR2
+   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(get_io_service(), SIGHUSR2));
    start_sighup_handler( sighup_set );
 #endif
 }
