@@ -135,10 +135,8 @@ void application::startup() {
    clean_up_signal_thread();
    setup_signal_handling_on_ios(get_io_service(), false);
 
-#ifdef SIGHUP
-   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(get_io_service(), SIGHUP));
+   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(*io_serv, SIGHUP));
    start_sighup_handler( sighup_set );
-#endif
 }
 
 void application::start_sighup_handler( std::shared_ptr<boost::asio::signal_set> sighup_set ) {
