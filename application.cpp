@@ -94,23 +94,18 @@ void application::wait_for_signal(std::shared_ptr<boost::asio::signal_set> ss) {
    });
 }
 
-void application::setup_signal_handling_on_ios(boost::asio::io_service& ios, bool startup) {
+void application::setup_signal_handling_on_ios(boost::asio::io_service& ios) {
    std::shared_ptr<boost::asio::signal_set> ss = std::make_shared<boost::asio::signal_set>(ios, SIGINT, SIGTERM);
 #ifdef SIGPIPE
    ss->add(SIGPIPE);
-#endif
-#ifdef SIGHUP
-   if( startup ) {
-      ss->add(SIGHUP);
-   }
 #endif
    wait_for_signal(ss);
 }
 
 void application::startup() {
-   //during startup, run a second thread to catch SIGINT/SIGTERM/SIGPIPE/SIGHUP
+   //during startup, run a second thread to catch SIGINT/SIGTERM/SIGPIPE
    boost::asio::io_service startup_thread_ios;
-   setup_signal_handling_on_ios(startup_thread_ios, true);
+   setup_signal_handling_on_ios(startup_thread_ios);
    std::thread startup_thread([&startup_thread_ios]() {
       startup_thread_ios.run();
    });
@@ -133,24 +128,23 @@ void application::startup() {
 
    //after startup, shut down the signal handling thread and catch the signals back on main io_service
    clean_up_signal_thread();
-   setup_signal_handling_on_ios(get_io_service(), false);
-
-   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(*io_serv, SIGHUP));
-   start_sighup_handler( sighup_set );
+   setup_signal_handling_on_ios(get_io_service());
 }
 
-void application::start_sighup_handler( std::shared_ptr<boost::asio::signal_set> sighup_set ) {
+void application::start_sighup_handler() {
 #ifdef SIGHUP
+   std::shared_ptr<boost::asio::signal_set> sighup_set(new boost::asio::signal_set(*io_serv, SIGHUP));
    sighup_set->async_wait([sighup_set, this](const boost::system::error_code& err, int /*num*/) {
-      if( err ) return;
-      app().post(priority::medium, [sighup_set, this]() {
-         sighup_callback();
-         for( auto plugin : initialized_plugins ) {
-            if( is_quiting() ) return;
-            plugin->handle_sighup();
+      app().post(priority::low, [err, this]() {
+         if(!err) {
+            sighup_callback();
+            for( auto plugin : initialized_plugins ) {
+               if( is_quiting() ) return;
+               plugin->handle_sighup();
+            }
+            start_sighup_handler();
          }
       });
-      start_sighup_handler( sighup_set );
    });
 #endif
 }
