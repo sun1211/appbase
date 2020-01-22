@@ -258,6 +258,8 @@ bool application::initialize_impl(int argc, char** argv, vector<abstract_plugin*
       bfs::path data_dir = workaround;
       if( data_dir.is_relative() )
          data_dir = bfs::current_path() / data_dir;
+      if( !bfs::exists(data_dir) )
+         bfs::create_directories(data_dir);
       my->_data_dir = data_dir;
    }
 
@@ -266,6 +268,8 @@ bool application::initialize_impl(int argc, char** argv, vector<abstract_plugin*
       bfs::path config_dir = workaround;
       if( config_dir.is_relative() )
          config_dir = bfs::current_path() / config_dir;
+      if( !bfs::exists(config_dir) )
+         bfs::create_directories(config_dir);
       my->_config_dir = config_dir;
    }
 
