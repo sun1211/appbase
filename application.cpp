@@ -207,8 +207,8 @@ void application::set_program_options()
          ("print-default-config", "Print default configuration template")
          ("data-dir,d", bpo::value<std::string>(), "Directory containing program runtime data")
          ("config-dir", bpo::value<std::string>(), "Directory containing configuration files such as config.ini")
-         ("config,c", bpo::value<std::string>()->default_value( "config.ini" ), "Configuration file name, file name only relative to config-dir, or relative path from current dir")
-         ("logconf,l", bpo::value<std::string>()->default_value( "logging.json" ), "Logging configuration file name/path for library users, file name only relative to config-dir, or relative path from current dir");
+         ("config,c", bpo::value<std::string>()->default_value( "config.ini" ), "Configuration file name, filename only default to config-dir, filename with relative path from current dir")
+         ("logconf,l", bpo::value<std::string>()->default_value( "logging.json" ), "Logging configuration file name/path for library users, filename only default to config-dir, filename with relative path from current dir");
 
    my->_cfg_options.add(app_cfg_opts);
    my->_app_options.add(app_cfg_opts);
