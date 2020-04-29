@@ -207,8 +207,8 @@ void application::set_program_options()
          ("print-default-config", "Print default configuration template")
          ("data-dir,d", bpo::value<std::string>(), "Directory containing program runtime data")
          ("config-dir", bpo::value<std::string>(), "Directory containing configuration files such as config.ini")
-         ("config,c", bpo::value<std::string>()->default_value( "config.ini" ), "Configuration file name relative to config-dir")
-         ("logconf,l", bpo::value<std::string>()->default_value( "logging.json" ), "Logging configuration file name/path for library users");
+         ("config,c", bpo::value<std::string>()->default_value( "config.ini" ), "Configuration file name, file name only relative to config-dir, or relative path from current dir")
+         ("logconf,l", bpo::value<std::string>()->default_value( "logging.json" ), "Logging configuration file name/path for library users, file name only relative to config-dir, or relative path from current dir");
 
    my->_cfg_options.add(app_cfg_opts);
    my->_app_options.add(app_cfg_opts);
@@ -271,14 +271,28 @@ bool application::initialize_impl(int argc, char** argv, vector<abstract_plugin*
 
    auto workaround = options["logconf"].as<std::string>();
    bfs::path logconf = workaround;
-   if( logconf.is_relative() )
-      logconf = my->_config_dir / logconf;
+   if( logconf.is_relative() ) {
+      if (logconf == logconf.filename()) {
+         // filename only
+         logconf = my->_config_dir / logconf;
+      } else {
+         // ./ or ../
+         logconf = bfs::current_path() / logconf;
+      }
+   }
    my->_logging_conf = logconf;
+   cout << "About to load logging config file: " << my->_logging_conf << std::endl;
 
    workaround = options["config"].as<std::string>();
    my->_config_file_name = workaround;
-   if( my->_config_file_name.is_relative() )
-      my->_config_file_name = my->_config_dir / my->_config_file_name;
+   if( my->_config_file_name.is_relative() ) {
+      if (my->_config_file_name == my->_config_file_name.filename()) {
+         my->_config_file_name = my->_config_dir / my->_config_file_name;
+      } else {
+         my->_config_file_name = bfs::current_path() / my->_config_file_name;
+      }
+   }
+   cout << "About to load config file: " << my->_config_file_name << std::endl;
 
    if(!bfs::exists(my->_config_file_name)) {
       if(my->_config_file_name.compare(my->_config_dir / "config.ini") != 0)
