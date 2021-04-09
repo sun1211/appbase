@@ -1,5 +1,4 @@
 #include <appbase/application.hpp>
-#include <appbase/version.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem.hpp>
@@ -34,8 +33,8 @@ class application_impl {
       bfs::path               _config_file_name;
 
       uint64_t                _version = 0;
-      std::string             _version_str = appbase_version_string;
-      std::string             _full_version_str = appbase_version_string;
+      std::string             _version_str;
+      std::string             _full_version_str;
 
       std::atomic_bool        _is_quiting{false};
 
