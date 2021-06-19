@@ -50,7 +50,7 @@ add_library( appbase
 target_link_libraries( appbase Boost::program_options Boost::filesystem Threads::Threads)
 
 target_include_directories( appbase
-                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
+                            PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
 
 set_target_properties( appbase PROPERTIES PUBLIC_HEADER "${HEADERS}" )
 
@@ -71,7 +71,7 @@ set(CPACK_PACKAGING_INSTALL_PREFIX /)
 
 install( TARGETS
    appbase
-
+   EXPORT appbase
    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
@@ -80,3 +80,8 @@ install( TARGETS
 install_directory_permissions( DIRECTORY ${CMAKE_INSTALL_FULL_INCLUDEDIR}/appbase )
 
 add_subdirectory( examples )
+install(EXPORT appbase
+        DESTINATION "share/appbase"
+        FILE appbase-targets.cmake)
+
+install(FILES appbase-config.cmake DESTINATION "share/appbase")
