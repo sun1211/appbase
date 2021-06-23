@@ -113,7 +113,85 @@ To trigger a graceful exit call `appbase::app().quit()` or send SIGTERM, SIGINT,
 
 To compile boost with c++14 use:
 
+## Setup environment
+**1.Install tool**
 ```
-./b2 ...  cxxflags="-std=c++0x -stdlib=libc++" linkflags="-stdlib=libc++" ...
+cd ~
+sudo apt install -y wget gnupg
+wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+sudo apt install -y \
+    autoconf2.13        \
+    build-essential     \
+    bzip2               \
+    cargo               \
+    clang-8             \
+    git                 \
+    libgmp-dev          \
+    libpq-dev           \
+    lld-8               \
+    lldb-8              \
+    ninja-build         \
+    nodejs              \
+    npm                 \
+    pkg-config          \
+    postgresql-server-dev-all \
+    python2.7-dev       \
+    python3-dev         \
+    rustc               \
+    zlib1g-dev
+    
+sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-8 100
+sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-8 100
 ```
+**2.install cmake**
+```
+cd ~
+wget https://github.com/Kitware/CMake/releases/download/v3.14.5/cmake-3.14.5.tar.gz
+tar xf cmake-3.14.5.tar.gz
+cd cmake-3.14.5
+./bootstrap --parallel=10
+make -j4
+sudo make -j4 install
+```
+**3. install boost**
+   - install with clang tool
+```
+cd ~
+wget https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz
+tar xf boost_1_70_0.tar.gz
+cd boost_1_70_0
+./bootstrap.sh
+sudo ./b2 toolset=clang -j6 install
+```
+   - install with gcc tool
+```
+cd ~
+wget https://dl.bintray.com/boostorg/release/1.70.0/source/boost_1_70_0.tar.gz
+tar xf boost_1_70_0.tar.gz
+cd boost_1_70_0
+./bootstrap.sh
+./b2 ... cxxflags="-std=c++0x -stdlib=libc++" linkflags="-stdlib=libc++" ...
+sudo ./b2 toolset=gcc -j4 install
+```
+
+**4. build project**
+- build with ninja, clang
+```
+git clone git@github.com:sun1211/appbase.git
+cd appbase
+mkdir build
+cd build
+cmake -GNinja -DCMAKE_CXX_COMPILER=clang++-8 -DCMAKE_C_COMPILER=clang-8 ..
+ninja
+```
+- build with gcc
+```
+git clone git@github.com:sun1211/appbase.git
+cd appbase
+mkdir build
+cd build
+cmake ..
+cmake --build -j4 .
+```
+    
 
